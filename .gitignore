@@ -1,35 +1,3 @@
-```
-# Dependencies
-node_modules/
+```gitignore
 
-# Environment variables
-.env
-.env.local
-.env.*
-
-# Build artifacts
-dist/
-build/
-*.js.map
-*.mjs.map
-*.ts
-*.d.ts
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.swp
-
-# IDE specific
-.vscode/
-.idea/
-
-# Package lock
-package-lock.json
-
-# OS generated
-.DS_Store
-Thumbs.db
 ```

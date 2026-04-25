@@ -14,6 +14,9 @@ app.use(express.json());
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
+// Mapbox Configuration
+const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN;
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'AushadhiSaathi API is running' });
@@ -123,7 +126,7 @@ app.get('/api/asha-workers', async (req, res) => {
   }
 });
 
-// Google Maps Geocoding
+// Mapbox Geocoding
 app.get('/api/geocode', async (req, res) => {
   try {
     const { address } = req.query;
@@ -132,36 +135,33 @@ app.get('/api/geocode', async (req, res) => {
       return res.status(400).json({ error: 'Address is required' });
     }
     
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    const accessToken = process.env.MAPBOX_ACCESS_TOKEN;
     
-    if (!apiKey) {
+    if (!accessToken) {
       // Return mock data if no API key
       return res.json({
         success: true,
         mock: true,
-        results: [{
+        features: [{
           geometry: {
-            location: {
-              lat: 12.9716,
-              lng: 77.5946
-            }
+            coordinates: [77.5946, 12.9716] // lng, lat format for GeoJSON
           },
-          formatted_address: 'Bangalore, Karnataka, India'
+          place_name: 'Bangalore, Karnataka, India'
         }]
       });
     }
     
     const response = await axios.get(
-      'https://maps.googleapis.com/maps/api/geocode/json',
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json`,
       {
         params: {
-          address,
-          key: apiKey
+          access_token: accessToken,
+          limit: 5
         }
       }
     );
     
-    res.json({ success: true, results: response.data.results });
+    res.json({ success: true, features: response.data.features });
   } catch (error) {
     console.error('Geocode API Error:', error);
     res.status(500).json({ 
@@ -171,7 +171,7 @@ app.get('/api/geocode', async (req, res) => {
   }
 });
 
-// Google Maps Directions
+// Mapbox Directions
 app.get('/api/directions', async (req, res) => {
   try {
     const { origin, destination, mode = 'walking' } = req.query;
@@ -180,39 +180,53 @@ app.get('/api/directions', async (req, res) => {
       return res.status(400).json({ error: 'Origin and destination are required' });
     }
     
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    const accessToken = process.env.MAPBOX_ACCESS_TOKEN;
     
-    if (!apiKey) {
+    // Mapbox profile mapping
+    const profileMap = {
+      walking: 'walking',
+      driving: 'driving-traffic',
+      cycling: 'cycling'
+    };
+    const profile = profileMap[mode] || 'walking';
+    
+    if (!accessToken) {
       // Return mock data
       return res.json({
         success: true,
         mock: true,
         routes: [{
+          distance: 1200,
+          duration: 900,
           legs: [{
-            distance: { text: '1.2 km', value: 1200 },
-            duration: { text: '15 mins', value: 900 },
+            distance: 1200,
+            duration: 900,
             steps: [
-              { html_instructions: 'Head north on Main Road', distance: { text: '0.5 km' } },
-              { html_instructions: 'Turn right onto Hospital Street', distance: { text: '0.7 km' } }
+              { instruction: 'Head north on Main Road', distance: 500 },
+              { instruction: 'Turn right onto Hospital Street', distance: 700 }
             ]
           }]
         }]
       });
     }
     
+    // Format: longitude,latitude
     const response = await axios.get(
-      'https://maps.googleapis.com/maps/api/directions/json',
+      `https://api.mapbox.com/directions/v5/mapbox/${profile}/${origin};${destination}/geojson`,
       {
         params: {
-          origin,
-          destination,
-          mode,
-          key: apiKey
+          access_token: accessToken,
+          steps: true,
+          geometries: 'geojson'
         }
       }
     );
     
-    res.json({ success: true, routes: response.data.routes });
+    res.json({ 
+      success: true, 
+      routes: response.data.routes,
+      waypoints: response.data.waypoints
+    });
   } catch (error) {
     console.error('Directions API Error:', error);
     res.status(500).json({ 

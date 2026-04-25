@@ -1,11 +1,11 @@
 # AushadhiSaathi Backend
 
-Backend server for the AushadhiSaathi mobile app with Gemini AI, Google Maps integration, and Kannada/English language support.
+Backend server for the AushadhiSaathi mobile app with Gemini AI, Mapbox integration, and Kannada/English language support.
 
 ## Features
 
 - 🤖 **Gemini AI Health Assistant** - Chat-based health queries in English/Kannada
-- 📍 **Google Maps Integration** - Location services, geocoding, and directions
+- 📍 **Mapbox Integration** - Location services, geocoding, and directions (free tier friendly)
 - 🌐 **Bilingual Support** - Full Kannada and English language toggle
 - 💊 **Prescription Scanner** - OCR-powered prescription analysis
 - 👩‍⚕️ **ASHA Worker Locator** - Find nearest community health workers
@@ -30,9 +30,9 @@ PORT=3000
 # Get from: https://makersuite.google.com/app/apikey
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# Google Maps API Key (Optional - mock data used if not provided)
-# Get from: https://console.cloud.google.com/apis/credentials
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+# Mapbox Access Token (Optional - mock data used if not provided)
+# Get from: https://account.mapbox.com/access-tokens/
+MAPBOX_ACCESS_TOKEN=your_mapbox_access_token_here
 ```
 
 ### 3. Start the Server
@@ -148,10 +148,10 @@ function setLanguage(lang) {
    - Visit: https://makersuite.google.com/app/apikey
    - Free tier available
 
-2. **Google Maps API** (Optional) - For maps and location services
-   - Visit: https://console.cloud.google.com/apis/credentials
-   - Enable: Geocoding API, Directions API
-   - Free tier: $200 monthly credit
+2. **Mapbox Access Token** (Optional) - For maps and location services
+   - Visit: https://account.mapbox.com/access-tokens/
+   - Enable: Geocoding, Directions API
+   - Free tier: 50,000 map loads/month (very generous!)
 
 ## Security Notes
 
